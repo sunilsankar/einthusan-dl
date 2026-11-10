@@ -18,7 +18,7 @@ use crate::error::AppError;
 use crate::scraper::slugify_filename;
 
 pub async fn run_app(args: Args) -> Result<(), AppError> {
-    logging::init_logging(args.logfile.as_deref())?;
+    logging::init_logging(args.logfile.as_deref(), args.debug)?;
 
     let client = EinthusanClient::new()?;
     let downloader = DownloaderKind::from_args(&args)?;

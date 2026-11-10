@@ -49,9 +49,16 @@ impl DownloadProgress {
     }
 
     pub fn read(&mut self, bytes: u64) {
-        self.now = Some(Instant::now());
         self.current += bytes;
-        self.report_progress();
+        let now = Instant::now();
+        let should_report = match self.now {
+            Some(last) => now.duration_since(last).as_millis() >= 100,
+            None => true,
+        };
+        if should_report {
+            self.now = Some(now);
+            self.report_progress();
+        }
     }
 
     pub fn stop(&mut self) {

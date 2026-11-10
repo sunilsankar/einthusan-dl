@@ -1,7 +1,7 @@
 use futures_util::StreamExt;
 use reqwest::header::CONTENT_LENGTH;
 use std::fs::File;
-use std::io::Write;
+use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::time::Duration;
 use tracing::{error, info, warn};
@@ -70,16 +70,18 @@ impl NativeDownloader {
             progress.start();
 
             let file_res = File::create(Path::new(filename));
-            let mut file = match file_res {
+            let raw_file = match file_res {
                 Ok(f) => f,
                 Err(e) => return Err(AppError::Io(e)),
             };
+            let mut file = BufWriter::with_capacity(1024 * 1024, raw_file);
 
             let mut stream = resp.bytes_stream();
 
             // Stream chunks directly to disk
             loop {
                 tokio::select! {
+                    biased;
                     _ = tokio::signal::ctrl_c() => {
                         info!("Keyboard Interrupt -- Removing partial file: {}", filename);
                         let _ = std::fs::remove_file(filename);
@@ -101,6 +103,10 @@ impl NativeDownloader {
                                 break;
                             }
                             None => {
+                                if let Err(e) = file.flush() {
+                                    let _ = std::fs::remove_file(filename);
+                                    return Err(AppError::Io(e));
+                                }
                                 progress.stop();
                                 return Ok(true);
                             }

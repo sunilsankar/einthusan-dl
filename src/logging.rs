@@ -5,7 +5,8 @@ use tracing_subscriber::FmtSubscriber;
 
 use crate::error::AppError;
 
-pub fn init_logging(log_file: Option<&str>) -> Result<(), AppError> {
+pub fn init_logging(log_file: Option<&str>, debug: bool) -> Result<(), AppError> {
+    let level = if debug { Level::DEBUG } else { Level::INFO };
     if let Some(path) = log_file {
         let file = OpenOptions::new()
             .create(true)
@@ -14,7 +15,7 @@ pub fn init_logging(log_file: Option<&str>) -> Result<(), AppError> {
             .map_err(AppError::Io)?;
 
         let subscriber = FmtSubscriber::builder()
-            .with_max_level(Level::DEBUG)
+            .with_max_level(level)
             .with_writer(file)
             .with_target(false)
             .finish();
@@ -22,7 +23,7 @@ pub fn init_logging(log_file: Option<&str>) -> Result<(), AppError> {
         let _ = tracing::subscriber::set_global_default(subscriber);
     } else {
         let subscriber = FmtSubscriber::builder()
-            .with_max_level(Level::INFO)
+            .with_max_level(level)
             .with_writer(std::io::stdout)
             .with_target(false)
             .without_time()
