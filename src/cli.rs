@@ -31,6 +31,10 @@ pub struct Args {
     #[arg(long = "path", default_value = "")]
     pub path: String,
 
+    /// Write the movie name to the specified file
+    #[arg(long = "output-movie-name")]
+    pub output_movie_name: Option<String>,
+
     /// Print lots of debug information
     #[arg(long = "debug", default_value_t = false)]
     pub debug: bool,

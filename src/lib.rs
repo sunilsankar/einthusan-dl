@@ -44,6 +44,11 @@ async fn process_single_movie(
     let movie_name = meta.movie_name;
     let movie_url = links.mp4_link;
 
+    // shortcut: truncate-write per movie; with multiple URLs the last name wins, upgrade to append/one file per movie if needed
+    if let Some(path) = &args.output_movie_name {
+        fs::write(path, &movie_name)?;
+    }
+
     debug!(
         "Start downloading movie [{}] from url {}",
         movie_name, movie_url

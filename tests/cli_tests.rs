@@ -28,6 +28,8 @@ fn test_cli_all_flags() {
         "/tmp/einthusan.log",
         "--wget",
         "/usr/local/bin/wget",
+        "--output-movie-name",
+        "/data/einthusan-dl/test.txt",
     ])
     .expect("Failed to parse all flags");
 
@@ -36,6 +38,10 @@ fn test_cli_all_flags() {
     assert_eq!(args.path, "/tmp/movies");
     assert_eq!(args.logfile.as_deref(), Some("/tmp/einthusan.log"));
     assert_eq!(args.wget.as_deref(), Some("/usr/local/bin/wget"));
+    assert_eq!(
+        args.output_movie_name.as_deref(),
+        Some("/data/einthusan-dl/test.txt")
+    );
 }
 
 #[test]
