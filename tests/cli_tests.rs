@@ -1,0 +1,50 @@
+use clap::Parser;
+use einthusan_dl::cli::Args;
+
+#[test]
+fn test_cli_minimal_args() {
+    let args = Args::try_parse_from(["einthusan-dl", "https://einthusan.tv/movie/watch/2ZEY/"])
+        .expect("Failed to parse minimal args");
+
+    assert_eq!(args.urls, vec!["https://einthusan.tv/movie/watch/2ZEY/"]);
+    assert!(!args.overwrite);
+    assert!(!args.skip_download);
+    assert_eq!(args.path, "");
+    assert!(args.wget.is_none());
+    assert!(args.curl.is_none());
+    assert!(args.logfile.is_none());
+}
+
+#[test]
+fn test_cli_all_flags() {
+    let args = Args::try_parse_from([
+        "einthusan-dl",
+        "https://einthusan.tv/movie/watch/2ZEY/",
+        "-o",
+        "--skip-download",
+        "--path",
+        "/tmp/movies",
+        "--log",
+        "/tmp/einthusan.log",
+        "--wget",
+        "/usr/local/bin/wget",
+    ])
+    .expect("Failed to parse all flags");
+
+    assert!(args.overwrite);
+    assert!(args.skip_download);
+    assert_eq!(args.path, "/tmp/movies");
+    assert_eq!(args.logfile.as_deref(), Some("/tmp/einthusan.log"));
+    assert_eq!(args.wget.as_deref(), Some("/usr/local/bin/wget"));
+}
+
+#[test]
+fn test_cli_default_wget_and_curl_bins() {
+    let args_wget = Args::try_parse_from(["einthusan-dl", "https://test.com", "--wget"])
+        .expect("Failed to parse --wget with default");
+    assert_eq!(args_wget.wget.as_deref(), Some("wget"));
+
+    let args_curl = Args::try_parse_from(["einthusan-dl", "https://test.com", "--curl"])
+        .expect("Failed to parse --curl with default");
+    assert_eq!(args_curl.curl.as_deref(), Some("curl"));
+}
