@@ -9,7 +9,14 @@ on:
       - v[0-9]+.*
 
 jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rustsec/audit-check@v2
+
   create-release:
+    needs: security-audit
     runs-on: ubuntu-latest
     permissions:
       contents: write
